@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # DeCertfy-dApp
 =======
 # Sample Hardhat Project
@@ -14,4 +14,4 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.js
 ```
->>>>>>> 5cd5477 (Initial commit: smart contracts)
+
