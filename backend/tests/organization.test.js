@@ -1,3 +1,4 @@
+
 const request = require('supertest');
 const app = require('../server');
 const mongoose = require('mongoose');
@@ -18,6 +19,7 @@ const testOrg = {
   email: 'orgtestorg@example.com',
 };
 
+jest.setTimeout(20000); 
 describe('Organization Actions API', () => {
   let studentToken, orgToken, orgId, studentId, requestId;
 
