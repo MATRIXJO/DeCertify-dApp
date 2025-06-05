@@ -1,0 +1,45 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+build/
+frontend/build/
+
+# Hardhat artifacts and cache
+artifacts/
+contracts/artifacts/
+cache/
+contracts/cache/
+
+# Environment variables
+.env
+**/.env
+.env.*
+**/.env.*
+
+# Logs
+logs/
+*.log
+debug.log
+npm-debug.log
+
+# Coverage
+coverage/
+**/coverage/
+coverage.json
+
+# IDE/editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Git internals
+.git/
+
+# Misc
+.pnp
+.pnp.js
+
+# Hardhat Ignition default folder for deployments against a local node
+contracts/ignition/deployments/chain-31337 
