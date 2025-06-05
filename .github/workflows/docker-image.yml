@@ -23,6 +23,8 @@ jobs:
           npm install
 
       - name: Run backend tests
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
         run: |
           cd backend
           npm test
