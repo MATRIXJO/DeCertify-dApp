@@ -7,9 +7,9 @@ build/
 frontend/build/
 
 # Hardhat artifacts and cache
-artifacts/
+
 contracts/artifacts/
-cache/
+
 contracts/cache/
 
 # Environment variables
