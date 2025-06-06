@@ -5,6 +5,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import * as Sentry from "@sentry/react";
+import { browserTracingIntegration } from "@sentry/react";
+
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.REACT_APP_SENTRY_DSN,
+  integrations: [browserTracingIntegration()],
+  tracesSampleRate: 1.0,
+  environment: process.env.NODE_ENV,
+});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
