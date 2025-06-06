@@ -11,12 +11,16 @@ const Sentry = require("@sentry/node");
 // Load environment variables from .env file
 dotenv.config();
 
-// Initialize Sentry only if DSN is available
-if (process.env.SENTRY_DSN) {
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV || 'production',
-  });
+// Initialize Sentry with error handling
+try {
+  if (process.env.SENTRY_DSN) {
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.NODE_ENV || 'production',
+    });
+  }
+} catch (error) {
+  console.warn('Sentry initialization failed:', error.message);
 }
 
 // Connect to MongoDB
@@ -24,9 +28,13 @@ connectDB();
 
 const app = express();
 
-// Add Sentry request handler only if DSN is available
-if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.requestHandler());
+// Add Sentry request handler with error handling
+try {
+  if (process.env.SENTRY_DSN) {
+    app.use(Sentry.Handlers.requestHandler());
+  }
+} catch (error) {
+  console.warn('Sentry request handler failed:', error.message);
 }
 
 // Middleware
@@ -46,9 +54,13 @@ app.get('/', (req, res) => {
   res.send('deCertify Backend API is running...');
 });
 
-// Add Sentry error handler only if DSN is available
-if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.errorHandler());
+// Add Sentry error handler with error handling
+try {
+  if (process.env.SENTRY_DSN) {
+    app.use(Sentry.Handlers.errorHandler());
+  }
+} catch (error) {
+  console.warn('Sentry error handler failed:', error.message);
 }
 
 // Error handling middleware (optional, but good practice)
