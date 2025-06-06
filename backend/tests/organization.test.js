@@ -1,4 +1,3 @@
-
 const request = require('supertest');
 const app = require('../server');
 const mongoose = require('mongoose');
@@ -19,9 +18,9 @@ const testOrg = {
   email: 'orgtestorg@example.com',
 };
 
-jest.setTimeout(20000); 
 describe('Organization Actions API', () => {
   let studentToken, orgToken, orgId, studentId, requestId;
+  const createdWallets = [];
 
   beforeAll(async () => {
     // Register organization
@@ -30,12 +29,14 @@ describe('Organization Actions API', () => {
       .send(testOrg);
     orgToken = orgRes.body.token;
     orgId = orgRes.body._id;
+    createdWallets.push(testOrg.walletAddress.toLowerCase());
     // Register student
     const studentRes = await request(app)
       .post('/api/auth/register')
       .send(testStudent);
     studentToken = studentRes.body.token;
     studentId = studentRes.body._id;
+    createdWallets.push(testStudent.walletAddress.toLowerCase());
     // Student requests a certificate
     const certRes = await request(app)
       .post('/api/users/request-certificate')
@@ -50,9 +51,11 @@ describe('Organization Actions API', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.db.collection('users').deleteMany({ walletAddress: { $in: [testStudent.walletAddress.toLowerCase(), testOrg.walletAddress.toLowerCase()] } });
+    await mongoose.connection.db.collection('users').deleteMany({ walletAddress: { $in: createdWallets } });
     await mongoose.connection.db.collection('certificaterequests').deleteMany({});
-    // Do not close the connection here to avoid double closing
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.connection.close();
+    }
   });
 
   it('should allow organization to view pending requests', async () => {
@@ -96,23 +99,31 @@ describe('Organization Actions API', () => {
   });
 
   it('should not allow organization to update a request it does not own', async () => {
-    // Register a second organization
+    // Register a second organization with unique data
+    const uniqueId = Date.now();
     const otherOrg = {
-      walletAddress: '0xOtherOrg',
+      walletAddress: `0xOtherOrg${uniqueId}`,
       name: 'Other Org',
       userType: 'organization',
       password: 'otherorgpassword',
-      email: 'otherorg@example.com',
+      email: `otherorg${uniqueId}@example.com`,
     };
     const otherOrgRes = await request(app)
       .post('/api/auth/register')
       .send(otherOrg);
+    console.log('DEBUG otherOrgRes.body:', otherOrgRes.body);
     const otherOrgToken = otherOrgRes.body.token;
+    createdWallets.push(otherOrg.walletAddress.toLowerCase());
+    expect(otherOrgToken).toBeDefined();
     // Try to update a request owned by testOrg
     const res = await request(app)
       .put(`/api/users/request/${requestId}/status`)
       .set('Authorization', `Bearer ${otherOrgToken}`)
       .send({ status: 'accepted', remarks: 'Should not be allowed' });
+    if (res.statusCode !== 404) {
+      console.log('DEBUG otherOrgToken:', otherOrgToken);
+      console.log('DEBUG response body:', res.body);
+    }
     expect(res.statusCode).toBe(404);
   });
 
