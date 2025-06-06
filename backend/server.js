@@ -11,19 +11,23 @@ const Sentry = require("@sentry/node");
 // Load environment variables from .env file
 dotenv.config();
 
-// Initialize Sentry
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV,
-});
+// Initialize Sentry only in non-test environments
+if (process.env.NODE_ENV !== 'test') {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV,
+  });
+}
 
 // Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// The request handler must be the first middleware
-app.use(Sentry.Handlers.requestHandler());
+// Add Sentry request handler only in non-test environments
+if (process.env.NODE_ENV !== 'test') {
+  app.use(Sentry.Handlers.requestHandler());
+}
 
 // Middleware
 // Enable CORS for all origins (adjust for production)
@@ -42,8 +46,10 @@ app.get('/', (req, res) => {
   res.send('deCertify Backend API is running...');
 });
 
-// The error handler must be before any other error middleware and after all controllers
-app.use(Sentry.Handlers.errorHandler());
+// Add Sentry error handler only in non-test environments
+if (process.env.NODE_ENV !== 'test') {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // Error handling middleware (optional, but good practice)
 app.use((err, req, res, next) => {
