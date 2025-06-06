@@ -38,7 +38,10 @@ describe('Certificate Request API', () => {
   afterAll(async () => {
     await mongoose.connection.db.collection('users').deleteMany({ walletAddress: { $in: [testStudent.walletAddress.toLowerCase(), testOrg.walletAddress.toLowerCase()] } });
     await mongoose.connection.db.collection('certificaterequests').deleteMany({});
-    // Do not close the connection here to avoid double closing
+    // Close the connection if it's still open
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.connection.close();
+    }
   });
 
   it('should allow a student to request a certificate', async () => {
@@ -83,4 +86,4 @@ describe('Certificate Request API', () => {
       });
     expect([400, 404]).toContain(res.statusCode);
   });
-}); 
+});
