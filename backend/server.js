@@ -6,14 +6,24 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
 const ipfsRoutes = require('./routes/ipfs');
+const Sentry = require("@sentry/node");
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+});
 
 // Connect to MongoDB
 connectDB();
 
 const app = express();
+
+// The request handler must be the first middleware
+app.use(Sentry.Handlers.requestHandler());
 
 // Middleware
 // Enable CORS for all origins (adjust for production)
@@ -31,6 +41,9 @@ app.use('/api/ipfs', ipfsRoutes); // IPFS related routes
 app.get('/', (req, res) => {
   res.send('deCertify Backend API is running...');
 });
+
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
 
 // Error handling middleware (optional, but good practice)
 app.use((err, req, res, next) => {
