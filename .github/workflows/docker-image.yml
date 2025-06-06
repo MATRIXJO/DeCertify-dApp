@@ -73,16 +73,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-push
     steps:
-      - name: Deploy Backend to Render
-        uses: render-actions/deploy@v1
-        with:
-          api_key: ${{ secrets.RENDER_API_KEY }}
-          service_id: ${{ secrets.RENDER_BACKEND_SERVICE_ID }}
-          environment: production
-      
-      - name: Deploy Frontend to Render
-        uses: render-actions/deploy@v1
-        with:
-          api_key: ${{ secrets.RENDER_API_KEY }}
-          service_id: ${{ secrets.RENDER_FRONTEND_SERVICE_ID }}
-          environment: production
+      - name: Trigger Render Backend Deploy
+        run: |
+          curl -X POST ${{ secrets.RENDER_BACKEND_HOOK_URL }}
+      - name: Trigger Render Frontend Deploy
+        run: |
+          curl -X POST ${{ secrets.RENDER_FRONTEND_HOOK_URL }}
