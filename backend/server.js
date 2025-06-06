@@ -11,11 +11,11 @@ const Sentry = require("@sentry/node");
 // Load environment variables from .env file
 dotenv.config();
 
-// Initialize Sentry only in non-test environments
-if (process.env.NODE_ENV !== 'test') {
+// Initialize Sentry only if DSN is available
+if (process.env.SENTRY_DSN) {
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV,
+    environment: process.env.NODE_ENV || 'production',
   });
 }
 
@@ -24,8 +24,8 @@ connectDB();
 
 const app = express();
 
-// Add Sentry request handler only in non-test environments
-if (process.env.NODE_ENV !== 'test') {
+// Add Sentry request handler only if DSN is available
+if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.requestHandler());
 }
 
@@ -46,8 +46,8 @@ app.get('/', (req, res) => {
   res.send('deCertify Backend API is running...');
 });
 
-// Add Sentry error handler only in non-test environments
-if (process.env.NODE_ENV !== 'test') {
+// Add Sentry error handler only if DSN is available
+if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.errorHandler());
 }
 
